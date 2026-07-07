@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>For Anjali, My Everything</title>
+    <style>
+        /* Theme & Reset */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Georgia', serif;
+        }
+
+        body {
+            background-color: #ffdee9; 
+            background-image: linear-gradient(180deg, #ffdee9 0%, #fff5f7 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            color: #4a4a4a;
+            overflow-x: hidden;
+        }
+
+        /* Diary Book Design */
+        .diary-container {
+            background: #ffffff;
+            width: 100%;
+            max-width: 650px;
+            min-height: 580px;
+            border-radius: 15px;
+            box-shadow: 0 15px 40px rgba(255, 112, 150, 0.3);
+            border-left: 12px solid #ff4d6d; /* Book Spine */
+            padding: 40px 30px 30px 30px;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        /* Ribbon Bookmark */
+        .diary-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 40px;
+            width: 15px;
+            height: 45px;
+            background: #ff85a1;
+            border-radius: 0 0 5px 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            z-index: 11;
+        }
+
+        /* Pages setup */
+        .diary-page {
+            display: none;
+            animation: pageTurn 0.6s ease forwards;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            flex-grow: 1;
+            justify-content: center;
+        }
+
+        .diary-page.active {
+            display: flex;
+        }
+
+        /* Cover Page Styling */
+        .cover-title {
+            font-size: 3rem;
+            color: #d63384;
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+
+        .cover-subtitle {
+            font-size: 1.3rem;
+            color: #ff7096;
+            font-style: italic;
+            margin-bottom: 35px;
+        }
+
+        .cover-heart {
+            font-size: 4.5rem;
+            animation: pulse 1.4s infinite;
+            margin-bottom: 35px;
+        }
+
+        .cover-message {
+            font-size: 1.15rem;
+            color: #5c3d46;
+            max-width: 85%;
+            line-height: 1.7;
+            margin-bottom: 40px;
+            font-style: italic;
+        }
+
+        /* Photo Frames for inner pages */
+        .photo-frame {
+            width: 100%;
+            max-width: 320px;
+            aspect-ratio: 4/5;
+            border: 8px solid #fff0f3;
+            outline: 1px solid #ffccd5;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 8px 25px rgba(255, 112, 150, 0.15);
+            margin-bottom: 25px;
+            background-color: #fafafa;
+        }
+
+        .photo-frame img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        /* Captions / Love Notes */
+        .love-note {
+            font-size: 1.2rem;
+            line-height: 1.7;
+            color: #443036;
+            max-width: 90%;
+            margin-bottom: 15px;
+            font-style: italic;
+        }
+
+        /* Big Proposal text adjustments */
+        .proposal-text {
+            font-size: 1.4rem;
+            font-weight: bold;
+            color: #d63384;
+            margin-top: 15px;
+            line-height: 1.6;
+        }
+
+        /* Proposal Interaction Buttons Container */
+        .proposal-buttons {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 30px;
+            width: 100%;
+            min-height: 60px;
+            margin-top: 25px;
+            position: relative;
+        }
+
+        /* Specific modifications for the Runaway No Theme */
+        .btn-yes {
+            background-color: #ff4d6d;
+            color: white;
+            box-shadow: 0 4px 15px rgba(255, 77, 109, 0.4);
+        }
+
+        .btn-yes:hover {
+            background-color: #d63384 !important;
+            transform: scale(1.1) translateY(-2px) !important;
+        }
+
+        .btn-no {
+            background-color: #fce4ec;
+            color: #ff4d6d;
+            border: 2px solid #ffccd5;
+            box-shadow: 0 4px 10px rgba(255, 112, 150, 0.1);
+            z-index: 9999;
+            transition: transform 0.1s ease, left 0.15s ease, top 0.15s ease;
+        }
+
+        /* Navigation Controls */
+        .diary-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            margin-top: 15px;
+            border-top: 1px dashed #ffccd5;
+            padding-top: 20px;
+        }
+
+        .diary-controls.hidden {
+            display: none;
+        }
+
+        .btn {
+            background-color: #ff85a1;
+            color: white;
+            border: none;
+            padding: 12px 28px;
+            font-size: 1rem;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 10px rgba(255, 133, 161, 0.3);
+        }
+
+        .btn:hover:not(:disabled) {
+            background-color: #ff4d6d;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 14px rgba(255, 77, 109, 0.4);
+        }
+
+        .btn:disabled {
+            background-color: #eddcd9;
+            color: #a89a98;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        .btn-large {
+            font-size: 1.15rem;
+            padding: 15px 40px;
+            border-radius: 30px;
+        }
+
+        .page-number {
+            font-size: 0.95rem;
+            color: #ff85a1;
+            font-weight: bold;
+        }
+
+        /* Keyframe Animations */
+        @keyframes pageTurn {
+            from { opacity: 0; transform: translateX(20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        @keyframes fallConfetti {
+            0% { transform: translateY(0); opacity: 1; }
+            100% { transform: translateY(110vh); opacity: 0; }
+        }
+        @keyframes swayConfetti {
+            0%, 100% { transform: translateX(-15px) rotate(-10deg); }
+            50% { transform: translateX(15px) rotate(10deg); }
+        }
+
+        @media (max-width: 500px) {
+            .diary-container { padding: 25px 20px 20px 20px; min-height: 520px; }
+            .cover-title { font-size: 2.3rem; }
+            .love-note { font-size: 1.05rem; }
+            .proposal-text { font-size: 1.2rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="diary-container">
+        
+        <div class="diary-page active" id="page-0">
+            <div class="cover-content">
+                <h1 class="cover-title">For Anjali</h1>
+                <p class="cover-subtitle">My forever, my absolute everything.</p>
+                <div class="cover-heart">💝</div>
+                <p class="cover-message">
+                    "I created this secret space because ordinary words can no longer hold the depth of what I feel for you. Take a deep breath, my love, and step inside my heart..."
+                </p>
+                <button class="btn btn-large" onclick="changePage(1)">Open Our Diary →</button>
+            </div>
+        </div>
+        
+        <div class="diary-page" id="page-1">
+            <div class="photo-frame">
+                <img src="photo1.jpg" alt="Anjali Photo 1">
+            </div>
+            <p class="love-note">"I am completely, helplessly consumed by you, Anjali. Your beauty isn't just something to look at—it’s a physical force that leaves me breathless every single time. One glance from you can rewrite my entire day."</p>
+        </div>
+
+        <div class="diary-page" id="page-2">
+            <div class="photo-frame">
+                <img src="photo2.jpg" alt="Anjali Photo 2">
+            </div>
+            <p class="love-note">"Before you, Anjali, I didn't know a human soul could feel like 'home.' The way you understand me without a word, the pure gold of your heart, and the sheer grace you carry yourself with makes me wonder what I ever did right to deserve a goddess like you."</p>
+        </div>
+
+        <div class="diary-page" id="page-3">
+            <div class="photo-frame">
+                <img src="photo3.jpg" alt="Anjali Photo 3">
+            </div>
+            <p class="love-note">"I didn’t just fall in love with you, Anjali—I completely surrendered to you. Every heartbeat of mine belongs to you. If I could give you one gift, it would be the ability to see yourself through my eyes, just so you could see how utterly perfect you are."</p>
+        </div>
+
+        <div class="diary-page" id="page-4">
+            <div class="photo-frame">
+                <img src="photo4.jpg" alt="Anjali Photo 4">
+            </div>
+            <p class="love-note">"You are the center of gravity in my life, Anjali. My peace in the chaos, my loudest laugh, and my quietest comfort. Everything beautiful, pure, and good in my world begins and ends with you."</p>
+        </div>
+
+        <div class="diary-page" id="page-5">
+            <div class="photo-frame">
+                <img src="photo5.jpg" alt="Anjali Photo 5">
+            </div>
+            <p class="love-note">"Look at this photograph, Anjali, and know this truth with absolute certainty: you are my ultimate masterpiece. I look at you and I see the girl I will love, protect, and cherish until my very last breath on this earth."</p>
+        </div>
+
+        <div class="diary-page" id="page-6">
+            <div class="photo-frame">
+                <img src="photo6.jpg" alt="Anjali Photo 6">
+            </div>
+            <p class="love-note">"Anjali, from the moment you entered my life, you changed it forever. I don’t want another day, another hour, or another second of my existence without you by my side as my wife. I want to build our kingdom together, face the world hand-in-hand, and love you fiercely through every lifetime."</p>
+            <p class="proposal-text" id="proposalQuestion">"Anjali, will you marry me and make me the happiest person in the universe? 💍❤️"</p>
+            
+            <div class="proposal-buttons" id="proposalBlock">
+                <button class="btn btn-yes btn-large" id="yesBtn" onclick="acceptProposal()">Yes! 💖</button>
+                <button class="btn btn-no btn-large" id="noBtn">No 🥺</button>
+            </div>
+        </div>
+
+        <div class="diary-controls hidden" id="controls">
+            <button class="btn" id="prevBtn" onclick="changePage(-1)">← Back</button>
+            <span class="page-number" id="pageDisplay">Page 1 of 6</span>
+            <button class="btn" id="nextBtn" onclick="changePage(1)">Next →</button>
+        </div>
+
+    </div>
+
+    <script>
+        let currentPage = 0;
+        const totalPhotoPages = 6; 
+        let confettiInterval;
+
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        const pageDisplay = document.getElementById('pageDisplay');
+        const controls = document.getElementById('controls');
+        
+        // References for the runaway button logic
+        const noBtn = document.getElementById('noBtn');
+        const yesBtn = document.getElementById('yesBtn');
+        const proposalQuestion = document.getElementById('proposalQuestion');
+        const proposalBlock = document.getElementById('proposalBlock');
+
+        function changePage(direction) {
+            if (confettiInterval) {
+                clearInterval(confettiInterval);
+            }
+
+            document.getElementById(`page-${currentPage}`).classList.remove('active');
+            currentPage += direction;
+            document.getElementById(`page-${currentPage}`).classList.add('active');
+            
+            if (currentPage === 0) {
+                controls.classList.add('hidden');
+            } else {
+                controls.classList.remove('hidden');
+                pageDisplay.textContent = `Page ${currentPage} of ${totalPhotoPages}`;
+                prevBtn.disabled = (currentPage === 1);
+                
+                // Hide standard navigation next button on the last page to force an action choice
+                if (currentPage === totalPhotoPages) {
+                    nextBtn.style.visibility = 'hidden';
+                } else {
+                    nextBtn.style.visibility = 'visible';
+                    nextBtn.disabled = false;
+                }
+            }
+
+            if (currentPage === totalPhotoPages) {
+                startHeartShower();
+            }
+        }
+
+        // Logic to make the No button run away
+        function dodgeButton() {
+            const padding = 50;
+            
+            // Deduct offsets to ensure elements remain fully viewable inside the window borders
+            const maxX = window.innerWidth - noBtn.offsetWidth - padding;
+            const maxY = window.innerHeight - noBtn.offsetHeight - padding;
+
+            // Compute randomly distributed positions
+            const randomX = Math.max(padding, Math.floor(Math.random() * maxX));
+            const randomY = Math.max(padding, Math.floor(Math.random() * maxY));
+
+            // Shift element layout rules immediately
+            noBtn.style.position = 'fixed';
+            noBtn.style.left = randomX + 'px';
+            noBtn.style.top = randomY + 'px';
+        }
+
+        // Apply interactive evasion events to desktop & mobile layouts
+        noBtn.addEventListener('mouseenter', dodgeButton);
+        noBtn.addEventListener('touchstart', (e) => {
+            e.preventDefault(); // Prevents touch processing click simulation events
+            dodgeButton();
+        });
+
+        // Executed when Anjali clicks "Yes!"
+        function acceptProposal() {
+            proposalQuestion.innerHTML = "💝 She said YES! I am the luckiest person alive! I love you endlessly, Anjali! 💍✨🎉";
+            
+            // Clean up the running element and lock choices
+            noBtn.style.display = 'none';
+            yesBtn.disabled = true;
+            yesBtn.style.transform = 'scale(1.2)';
+            
+            // Trigger permanent heavier celebration shower
+            setInterval(createConfettiElement, 150);
+        }
+
+        function startHeartShower() {
+            const colors = ['#ff4d6d', '#d63384', '#ff85a1', '#ffc2d1'];
+            const shapes = ['❤️', '💖', '💍', '✨', '💕'];
+
+            for (let i = 0; i < 10; i++) {
+                setTimeout(createConfettiElement, i * 100);
+            }
+
+            confettiInterval = setInterval(createConfettiElement, 300);
+        }
+
+        function createConfettiElement() {
+            const colors = ['#ff4d6d', '#d63384', '#ff85a1', '#ffc2d1'];
+            const shapes = ['❤️', '💖', '💍', '✨', '💕'];
+            
+            const element = document.createElement('div');
+            element.style.position = 'fixed';
+            element.style.zIndex = '9999';
+            element.style.top = '-10vh';
+            element.style.left = Math.random() * 100 + 'vw';
+            element.style.pointerEvents = 'none';
+            
+            element.innerText = shapes[Math.floor(Math.random() * shapes.length)];
+            element.style.color = colors[Math.floor(Math.random() * colors.length)];
+            element.style.fontSize = (Math.random() * 20 + 15) + 'px';
+            element.style.opacity = Math.random() + 0.5;
+            
+            const duration = Math.random() * 3 + 4 + 's';
+            const swayFrequency = Math.random() * 2 + 1 + 's';
+            
+            element.style.animation = `fallConfetti ${duration} linear forwards, swayConfetti ${swayFrequency} ease-in-out infinite`;
+
+            document.body.appendChild(element);
+
+            setTimeout(() => { element.remove(); }, parseFloat(duration) * 1000);
+        }
+    </script>
+</body>
+</html>
